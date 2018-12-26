@@ -13,6 +13,7 @@ public class Point {
     private ArrayList<Point> neighbors;
     private Point previous;
     private boolean wall;
+    private boolean isClicked = false;
 
     public Point(int x,int y, int width, int height,boolean wall){
         this.x=x;
@@ -121,6 +122,14 @@ public class Point {
 
     public boolean isWall() {
         return wall;
+    }
+
+    public boolean isClicked() {
+        return isClicked;
+    }
+
+    public void setClicked(boolean clicked) {
+        isClicked = clicked;
     }
 }
 

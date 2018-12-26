@@ -1,7 +1,5 @@
 package TPN;
 
-import javafx.scene.shape.Path;
-
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Random;
@@ -31,14 +29,16 @@ public class Map {
     }
     public boolean setWall(int spawnRate){
         Random random = new Random();
-        return random.nextInt(spawnRate)>8;
+        return random.nextInt(spawnRate) > 6;
     }
 
     public void draw(){
         for (int i = 0; i < Pathfinding.rows; i++) {
             for (int j = 0; j < Pathfinding.cols; j++) {
-                if(grid[i][j] != null && grid[i][j].isWall()){
-                    grid[i][j].show(pathfinding,Color.BLACK);
+                if (grid[i][j] != null && grid[i][j].isWall()) {
+                    grid[i][j].show(pathfinding, Color.BLACK);
+                } else if (grid[i][j] != null && grid[i][j].isClicked()) {
+                    grid[i][j].show(pathfinding, Color.MAGENTA);
                 }else if(reconstructPath != null && reconstructPath.size()>0 && reconstructPath.contains(grid[i][j])){
                     grid[i][j].show(pathfinding,Color.red);
                 }else if(pathfinding.getOpenSet() !=null && pathfinding.getOpenSet().size()>0 && pathfinding.getOpenSet().contains(grid[i][j])) {
@@ -56,7 +56,16 @@ public class Map {
         return grid;
     }
 
-
+    public void resetGrid() {
+        for (int i = 0; i < Pathfinding.rows; i++) {
+            for (int j = 0; j < Pathfinding.cols; j++) {
+                grid[i][j].setF(0);
+                grid[i][j].setH(0);
+                grid[i][j].setG(0);
+                grid[i][j].setClicked(false);
+            }
+        }
+    }
 
     private int calculateWidthOfPoints(){
         return Pathfinding.width/Pathfinding.rows;
