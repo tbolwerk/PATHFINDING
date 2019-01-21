@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Pathfinding extends PApplet implements Runnable {
-    public static int rows = 50;
-    public static int cols = 50;
+    public static int rows = 40;
+    public static int cols = 40;
     public static int width, height;
     public static boolean diagonal = false;
     private int score = 0;
@@ -39,14 +39,21 @@ public class Pathfinding extends PApplet implements Runnable {
 
     public void draw() {
         map.draw();
+//        if(map.getReconstructPath() != null) {
+//            fill(255, 0, 0);
+//            textSize(60);
+//            text(map.getReconstructPath().size(), 0, 60);
+//        }
         run();
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                if (mouseOverRect(map.getGrid()[i][j].getStartX(), map.getGrid()[i][j].getWidth(), map.getGrid()[i][j].getStartY(), map.getGrid()[i][j].getHeight())) {
-                    System.out.println("G=" + map.getGrid()[i][j].getG() + "H=" + map.getGrid()[i][j].getH() + "F=" + map.getGrid()[i][j].getF());
-                }
-            }
-        }
+//        for (int i = 0; i < rows; i++) {
+//            for (int j = 0; j < cols; j++) {
+//                if (mouseOverRect(map.getGrid()[i][j].getStartX(), map.getGrid()[i][j].getWidth(), map.getGrid()[i][j].getStartY(), map.getGrid()[i][j].getHeight())) {
+//                    System.out.println("G=" + map.getGrid()[i][j].getG() + "H=" + map.getGrid()[i][j].getH() + "F=" + map.getGrid()[i][j].getF());
+//                }
+//            }
+//        }
+
+        interaction();
 
     }
 
@@ -54,29 +61,46 @@ public class Pathfinding extends PApplet implements Runnable {
         return mouseX>=x && mouseX<x+width && mouseY>=y && mouseY<y+height;
     }
 
-    @Override
-    public void mouseClicked() {
+    public void interaction() {
 
-        if(startAndEndPoint.size()>1){
+
+        if (mousePressed && getSelectedPoint() != null) {
+            //Making walls when pressing ANY keyboard key
+            if (keyPressed) {
+                getSelectedPoint().setWall(true);
+                //Setting start & endpoint from here..
+            } else if (startAndEndPoint.size() == 0) {
+                startAndEndPoint.add(getSelectedPoint());
+                getSelectedPoint().setClicked(true);
+            } else if (startAndEndPoint.size() == 1 && !startAndEndPoint.get(0).equals(getSelectedPoint())) {
+                startAndEndPoint.add(getSelectedPoint());
+                getSelectedPoint().setClicked(true);
+            }
+        }
+
+    }
+
+
+    private void resetMapState() {
+
             startAndEndPoint.clear();
             openSet.clear();
             closedSet.clear();
             map.resetGrid();
-        }
+
+
+    }
+
+    private Point getSelectedPoint() {
+        Point selectedPoint = null;
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                if(mouseOverRect(map.getGrid()[i][j].getStartX(),map.getGrid()[i][j].getWidth(),map.getGrid()[i][j].getStartY(),map.getGrid()[i][j].getHeight())){
-                    System.out.println("G=" + map.getGrid()[i][j].getG() + "H=" + map.getGrid()[i][j].getH() + "F=" + map.getGrid()[i][j].getF());
-                    if(startAndEndPoint.size()==0){
-                        startAndEndPoint.add(map.getGrid()[i][j]);
-                        map.getGrid()[i][j].setClicked(true);
-                    }else if(startAndEndPoint.size()==1){
-                        startAndEndPoint.add(map.getGrid()[i][j]);
-                        map.getGrid()[i][j].setClicked(true);
-                    }
+                if (mouseOverRect(map.getGrid()[i][j].getStartX(), map.getGrid()[i][j].getWidth(), map.getGrid()[i][j].getStartY(), map.getGrid()[i][j].getHeight())) {
+                    selectedPoint = map.getGrid()[i][j];
                 }
             }
         }
+        return selectedPoint;
     }
 
     private void pathFinding(Point start, Point goal) {
@@ -89,24 +113,25 @@ public class Pathfinding extends PApplet implements Runnable {
 
         openSet.add(start);
         Iterator<Point> iterator = openSet.iterator();
-        while (iterator.hasNext()) {
-            if (openSet.size() == 1) {
+        while (iterator.hasNext()) {//while openset has points in it
+            if (openSet.size() == 1) {//if one option is open just go with that no need for equation
                 current = openSet.get(0);
-            } else {
+            } else {//more than one option in the openset, it needs to be evaluted if its F value is actualy the lowest
                 current = iterator.next();
                 for (Point open : openSet) {
                     if (open.getF() < current.getF()) {
-                        current = open;
+                        current = open;//not the lowest F values, so change it to the new lower value
                     }
                     }
                 }
             if (current.equals(goal)) {
                 System.out.println("done");
-                drawPathfindingLine(current);
+                resetMapState();
+                drawPathfindingLine(current);//draw the path when its done
                 break;
             }
-            drawPathfindingLine(current);
-            openSet.remove(current);
+            drawPathfindingLine(current);//draw the path its currently examining
+            openSet.remove(current);//it determined its the best path so its added to the closedset and needs thusfore be removed from the closedset
             closedSet.add(current);
 
 
@@ -114,8 +139,8 @@ public class Pathfinding extends PApplet implements Runnable {
                 if (!closedSet.contains(neighbor) && !neighbor.isWall()) {
                     int tempG = current.getG() + heuristics(neighbor, current);//needs to be checked again to make sure its the lowest G
                     if (!openSet.contains(neighbor)) {
-                        openSet.add(neighbor);
-                    } else if (tempG >= neighbor.getG()) {
+                        openSet.add(neighbor);//adding all the neighbors of the current, wich are not already in the openset
+                    } else if (tempG >= neighbor.getG()) {//also cheching if this path is better or nog, if the g is higher or even
                         //no its not a better path
                         continue;
                     }
@@ -137,7 +162,6 @@ public class Pathfinding extends PApplet implements Runnable {
             path.add(temp.getPrevious());
             map.setReconstructPath(path);
             temp = temp.getPrevious();
-            score++;
         }
 
     }
@@ -159,8 +183,8 @@ public class Pathfinding extends PApplet implements Runnable {
     }
 
     public void run() {
-        if(startAndEndPoint.size()==2){
-            pathFinding(startAndEndPoint.get(0),startAndEndPoint.get(1));
+        if (startAndEndPoint.size() == 2) {
+            pathFinding(startAndEndPoint.get(0), startAndEndPoint.get(1));
         }
     }
 

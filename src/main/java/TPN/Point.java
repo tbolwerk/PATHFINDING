@@ -60,6 +60,10 @@ public class Point {
 
     }
 
+    public void setWall(boolean wall) {
+        this.wall = wall;
+    }
+
     public ArrayList<Point> getNeighbors() {
         return neighbors;
     }
