@@ -8,7 +8,7 @@ public class Map {
     private Point[][] grid;
     private Pathfinding pathfinding;
     private ArrayList<Point> reconstructPath;
-    private int walls = 1;
+    public int walls = 1;
     public Map(Pathfinding pathfinding){
         this.pathfinding=pathfinding;
         this.grid= new Point[Pathfinding.rows][Pathfinding.cols];

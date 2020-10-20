@@ -5,6 +5,7 @@ import processing.core.PApplet;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Pathfinding extends PApplet implements Runnable {
@@ -33,17 +34,18 @@ public class Pathfinding extends PApplet implements Runnable {
     }
 
     public void setup() {
+        map.walls = 10;
         map.setup();
         map.draw();
     }
 
     public void draw() {
         map.draw();
-//        if(map.getReconstructPath() != null) {
-//            fill(255, 0, 0);
-//            textSize(60);
-//            text(map.getReconstructPath().size(), 0, 60);
-//        }
+        if(map.getReconstructPath() != null) {
+            fill(255, 0, 0);
+            textSize(60);
+            text(map.getReconstructPath().size(), 0, 60);
+        }
         run();
 //        for (int i = 0; i < rows; i++) {
 //            for (int j = 0; j < cols; j++) {
@@ -62,7 +64,10 @@ public class Pathfinding extends PApplet implements Runnable {
     }
 
     public void interaction() {
-
+        if(keyPressed && keyCode == 82){
+            resetMapState();
+            setup();
+        }
 
         if (mousePressed && getSelectedPoint() != null) {
             //Making walls when pressing ANY keyboard key
